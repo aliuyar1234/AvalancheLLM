@@ -1,5 +1,6 @@
 # Avalanche LLM: Token–Layer Activation Event Cascades in LLMs
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18435925.svg)](https://doi.org/10.5281/zenodo.18435925)
 [![Paper PDF](https://img.shields.io/badge/Paper-PDF-blue)](https://github.com/aliuyar1234/AvalancheLLM/raw/main/paper.pdf)
 [![Cite](https://img.shields.io/badge/Cite-CITATION.cff-green)](CITATION.cff)
 [![Last commit](https://img.shields.io/github/last-commit/aliuyar1234/AvalancheLLM)](https://github.com/aliuyar1234/AvalancheLLM/commits/main)
