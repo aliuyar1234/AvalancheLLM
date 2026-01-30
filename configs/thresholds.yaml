@@ -1,0 +1,3 @@
+thresholds:
+  tau0: CANON.CONST.TAU0_BASELINE
+  rate_match_tol_abs: CANON.CONST.RATE_MATCH_TOL_ABS

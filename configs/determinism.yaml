@@ -1,0 +1,4 @@
+determinism:
+  seed: CANON.CONST.BOOTSTRAP_SEED
+  torch_deterministic: true
+  disable_tf32: true

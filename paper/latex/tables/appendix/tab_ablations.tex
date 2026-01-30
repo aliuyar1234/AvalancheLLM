@@ -1,0 +1,73 @@
+% NOTE: This table is typeset as a longtable to avoid float-too-large warnings in the appendix.
+\begin{center}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.05}
+\setlength{\LTpre}{0pt}
+\setlength{\LTpost}{0pt}
+\begin{longtable}{llrrrr}
+\caption{Ablation comparison of gain interventions at matched rates.}\label{tab:ablations}\\
+\toprule
+Intervention & Spike def & Target rate & $g$ & $\Delta b_{\mathrm{tot}}$ & max|rate err| \\
+\midrule
+\endfirsthead
+\multicolumn{6}{l}{\textbf{Table \thetable} (continued)}\\
+\toprule
+Intervention & Spike def & Target rate & $g$ & $\Delta b_{\mathrm{tot}}$ & max|rate err| \\
+\midrule
+\endhead
+\midrule
+\multicolumn{6}{r}{\footnotesize Continued on next page}\\
+\endfoot
+\bottomrule
+\endlastfoot
+\texttt{ATTN\_GLOBAL} & one-sided (+) & 1e-05 & 0.700 & 0.239 & 9.81e-08 \\
+ \texttt{ATTN\_GLOBAL} & one-sided (+) & 2e-05 & 0.700 & 0.242 & 2.53e-07 \\
+ \texttt{ATTN\_GLOBAL} & one-sided (+) & 4e-05 & 1.300 & 0.235 & 3.86e-07 \\
+ \texttt{ATTN\_GLOBAL} & one-sided (+) & 8e-05 & 1.300 & 0.164 & 9.53e-07 \\
+ \texttt{ATTN\_GLOBAL} & two-sided ($|\cdot|$) & 1e-05 & 0.850 & 0.287 & 4.34e-08 \\
+ \texttt{ATTN\_GLOBAL} & two-sided ($|\cdot|$) & 2e-05 & 1.000 & 0.301 & 6.21e-08 \\
+ \texttt{ATTN\_GLOBAL} & two-sided ($|\cdot|$) & 4e-05 & 1.300 & 0.273 & 2.06e-07 \\
+ \texttt{ATTN\_GLOBAL} & two-sided ($|\cdot|$) & 8e-05 & 1.300 & 0.201 & 4.36e-07 \\
+ \texttt{MLP\_BAND\_EARLY} & one-sided (+) & 1e-05 & 0.700 & 0.256 & 1.03e-07 \\
+ \texttt{MLP\_BAND\_EARLY} & one-sided (+) & 2e-05 & 0.700 & 0.254 & 2.12e-07 \\
+ \texttt{MLP\_BAND\_EARLY} & one-sided (+) & 4e-05 & 1.300 & 0.220 & 4.85e-07 \\
+ \texttt{MLP\_BAND\_EARLY} & one-sided (+) & 8e-05 & 1.300 & 0.152 & 1.07e-06 \\
+ \texttt{MLP\_BAND\_EARLY} & two-sided ($|\cdot|$) & 1e-05 & 0.850 & 0.296 & 4.36e-08 \\
+ \texttt{MLP\_BAND\_EARLY} & two-sided ($|\cdot|$) & 2e-05 & 1.000 & 0.306 & 6.21e-08 \\
+ \texttt{MLP\_BAND\_EARLY} & two-sided ($|\cdot|$) & 4e-05 & 1.300 & 0.262 & 1.93e-07 \\
+ \texttt{MLP\_BAND\_EARLY} & two-sided ($|\cdot|$) & 8e-05 & 1.300 & 0.188 & 4.27e-07 \\
+ \texttt{MLP\_BAND\_LATE} & one-sided (+) & 1e-05 & 0.700 & 0.262 & 1.19e-07 \\
+ \texttt{MLP\_BAND\_LATE} & one-sided (+) & 2e-05 & 0.700 & 0.260 & 1.93e-07 \\
+ \texttt{MLP\_BAND\_LATE} & one-sided (+) & 4e-05 & 1.300 & 0.223 & 3.66e-07 \\
+ \texttt{MLP\_BAND\_LATE} & one-sided (+) & 8e-05 & 1.300 & 0.156 & 8.43e-07 \\
+ \texttt{MLP\_BAND\_LATE} & two-sided ($|\cdot|$) & 1e-05 & 0.850 & 0.298 & 3.65e-08 \\
+ \texttt{MLP\_BAND\_LATE} & two-sided ($|\cdot|$) & 2e-05 & 1.000 & 0.303 & 6.21e-08 \\
+ \texttt{MLP\_BAND\_LATE} & two-sided ($|\cdot|$) & 4e-05 & 1.300 & 0.261 & 2.05e-07 \\
+ \texttt{MLP\_BAND\_LATE} & two-sided ($|\cdot|$) & 8e-05 & 1.300 & 0.192 & 4.44e-07 \\
+ \texttt{MLP\_BAND\_MID} & one-sided (+) & 1e-05 & 0.700 & 0.263 & 9.37e-08 \\
+ \texttt{MLP\_BAND\_MID} & one-sided (+) & 2e-05 & 0.700 & 0.263 & 2.62e-07 \\
+ \texttt{MLP\_BAND\_MID} & one-sided (+) & 4e-05 & 1.300 & 0.218 & 8.40e-07 \\
+ \texttt{MLP\_BAND\_MID} & one-sided (+) & 8e-05 & 1.300 & 0.154 & 9.60e-07 \\
+ \texttt{MLP\_BAND\_MID} & two-sided ($|\cdot|$) & 1e-05 & 0.850 & 0.297 & 5.15e-08 \\
+ \texttt{MLP\_BAND\_MID} & two-sided ($|\cdot|$) & 2e-05 & 1.000 & 0.304 & 6.21e-08 \\
+ \texttt{MLP\_BAND\_MID} & two-sided ($|\cdot|$) & 4e-05 & 1.300 & 0.262 & 2.62e-07 \\
+ \texttt{MLP\_BAND\_MID} & two-sided ($|\cdot|$) & 8e-05 & 1.300 & 0.191 & 4.34e-07 \\
+ \texttt{MLP\_GLOBAL} & one-sided (+) & 1e-05 & 1.000 & 0.263 & 1.12e-07 \\
+ \texttt{MLP\_GLOBAL} & one-sided (+) & 1e-05 & 0.700 & 0.266 & 9.63e-08 \\
+ \texttt{MLP\_GLOBAL} & one-sided (+) & 2e-05 & 1.000 & 0.260 & 1.71e-07 \\
+ \texttt{MLP\_GLOBAL} & one-sided (+) & 2e-05 & 0.700 & 0.271 & 1.78e-07 \\
+ \texttt{MLP\_GLOBAL} & one-sided (+) & 4e-05 & 1.000 & 0.226 & 3.66e-07 \\
+ \texttt{MLP\_GLOBAL} & one-sided (+) & 4e-05 & 1.300 & 0.210 & 4.65e-07 \\
+ \texttt{MLP\_GLOBAL} & one-sided (+) & 8e-05 & 1.000 & 0.158 & 8.98e-07 \\
+ \texttt{MLP\_GLOBAL} & one-sided (+) & 8e-05 & 1.300 & 0.145 & 1.12e-06 \\
+ \texttt{MLP\_GLOBAL} & two-sided ($|\cdot|$) & 1e-05 & 1.000 & 0.295 & 3.65e-08 \\
+ \texttt{MLP\_GLOBAL} & two-sided ($|\cdot|$) & 1e-05 & 0.850 & 0.300 & 4.30e-08 \\
+ \texttt{MLP\_GLOBAL} & two-sided ($|\cdot|$) & 2e-05 & 1.000 & 0.305 & 6.21e-08 \\
+ \texttt{MLP\_GLOBAL} & two-sided ($|\cdot|$) & 2e-05 & 1.000 & 0.305 & 6.21e-08 \\
+ \texttt{MLP\_GLOBAL} & two-sided ($|\cdot|$) & 4e-05 & 1.000 & 0.267 & 2.05e-07 \\
+ \texttt{MLP\_GLOBAL} & two-sided ($|\cdot|$) & 4e-05 & 1.300 & 0.253 & 2.54e-07 \\
+ \texttt{MLP\_GLOBAL} & two-sided ($|\cdot|$) & 8e-05 & 1.000 & 0.197 & 4.44e-07 \\
+ \texttt{MLP\_GLOBAL} & two-sided ($|\cdot|$) & 8e-05 & 1.300 & 0.182 & 6.07e-07 \\
+\end{longtable}
+\end{center}

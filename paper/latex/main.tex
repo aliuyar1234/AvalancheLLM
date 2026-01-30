@@ -1,0 +1,332 @@
+
+\documentclass[10pt]{article}
+
+% --- Formatting (ICLR-like two-column layout without relying on external style files) ---
+\usepackage[letterpaper,margin=0.78in,columnsep=0.25in]{geometry}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\setlength{\emergencystretch}{1.5em}
+
+\usepackage{times}
+\usepackage{microtype}
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{siunitx}
+
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{float}
+
+\usepackage{longtable}
+\usepackage{array}
+
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[colorlinks=true,allcolors=blue]{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+\usepackage{xurl}
+
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf}
+
+\usepackage{enumitem}
+\setlist[itemize]{leftmargin=*,topsep=2pt,itemsep=2pt}
+\setlist[enumerate]{leftmargin=*,topsep=2pt,itemsep=2pt}
+
+\title{\vspace{-0.2in}Token--Layer Activation Event Cascades in LLMs: Rate-Matched Connectivity under Gain Scaling}
+\author{Ali Uyar\\Independent Researcher}
+\date{}
+
+\begin{document}
+
+\twocolumn[
+\maketitle
+\vspace{-0.15in}
+\begin{abstract}
+Activation patterns in large language models are often studied via static sparsity or outlier magnitudes, but less is known about how \emph{activation events} form connected cascades across token positions and depth. We model gated-MLP activations as a token-by-layer \emph{event lattice} by standardizing a fixed internal tensor and thresholding it into sparse binary events. This enables connected-component analysis that yields avalanche-like cascades on a two-dimensional lattice. We introduce directional branching metrics that decompose local propagation into token-direction and depth-direction components, and we evaluate a low-compute gain intervention that scales each layer's MLP residual contribution at inference time.
+
+To isolate connectivity effects from trivial rate effects, we design two strong controls: (i) \emph{per-layer rate-matched thresholds} that equalize marginal event rates across gains, and (ii) a \emph{marginals-preserving raster shuffle} that permutes token order within each layer while preserving per-layer event counts exactly. We avoid equating heavy-tailed component statistics with criticality by treating tail fits as descriptive diagnostics and using multiple falsifiable signatures. Finally, we calibrate a gain $g^{\star}$ on Dataset~A using a mechanistic criterion based on branching, then evaluate the same $g^{\star}$ unchanged on Dataset~B and ARC multiple-choice, comparing against the baseline $g{=}1$.
+
+In the provided 7B runs, total branching $b_{\mathrm{tot}}$ varies with gain under rate matching (Table~\ref{tab:t01_selected} and \Cref{fig:F03_BRANCHING_CURVES}) and the null-controlled residual $\Delta b_{\mathrm{tot}}$ remains non-zero (\Cref{fig:F04_NULL_DELTAB}). This framework supports both positive and negative transfer outcomes under strong controls by reporting mechanistic signatures alongside task metrics.
+\end{abstract}
+\vspace{0.1in}
+]
+
+\section{Introduction}
+Large language models (LLMs) exhibit rich internal activation structure, including sparsity patterns, context-dependent gating, and occasional extreme outliers. However, many analyses treat activations as independent samples or focus on layerwise distributions, which can obscure \emph{connectivity in token-by-depth space}. Motivated by cascade analyses in neuroscience \citep{beggs2003neuronal}, we ask a simple mechanistic question: \emph{when we threshold a fixed internal tensor into sparse activation events, do those events form connected cascades across token position and layer depth, and how does that connectivity change under controlled perturbations?}
+
+We propose a concrete measurement construct: a token-by-layer event raster derived from standardized gated-MLP activations. This event lattice supports connected-component analysis (``avalanches'') and directional branching metrics that quantify local propagation along token and depth directions. We then study a global \emph{gain} intervention that scales the MLP residual contribution by a scalar $g$ at inference time. Because $g$ trivially rescales activations and thus event \emph{rates}, we include reviewer-proof controls that (i) match marginal event rates per layer across $g$ and (ii) destroy within-layer temporal structure while preserving marginals exactly. We use these controls to probe quasi-critical-like regimes without claiming a phase transition or brain equivalence.
+
+\textbf{Contributions.}
+\begin{itemize}
+  \item \textbf{Event lattice construct.} A token-by-layer binary event raster derived from a fixed standardized gated-MLP tensor, enabling avalanche-style connected-component analysis in transformers.
+  \item \textbf{Directional branching decomposition.} Metrics $b_{\text{time}}$, $b_{\text{depth}}$, and $b_{\text{tot}}$ that quantify local propagation along token and depth directions, plus a marginals-controlled residual $\Delta b$.
+  \item \textbf{Reviewer-proof controls.} Per-layer rate-matched thresholds $\tau_{\ell}(g)$ and a post-hoc within-layer time-permutation null that preserves marginals exactly.
+  \item \textbf{Mechanistic calibration and transfer test.} Calibrate $g^{\star}$ on Dataset~A by minimizing $|b_{\mathrm{tot}}(g)-1|$ over a fixed gain grid (allowing boundary solutions), then evaluate unchanged on Dataset~B and ARC multiple-choice against $g{=}1$.
+  \item \textbf{Conservative quasi-critical probing.} Multiple signatures used as falsifiable probes; heavy-tail fits are reported as descriptive only \citep{clauset2009power,touboul2010can}.
+\end{itemize}
+
+\section{Related work}
+We draw inspiration from neuronal avalanche analyses and branching measures \citep{beggs2003neuronal} while avoiding any claim of brain equivalence. We also follow statistical cautions that power-law-like tails alone are insufficient evidence of criticality \citep{clauset2009power,touboul2010can}. In deep learning, ``edge-of-chaos'' style analyses study signal propagation and criticality-like regimes in random networks and deep models \citep{schoenholz2016deep,poole2016exponential,pennington2017resurrecting}; our work instead operates at inference time on trained transformers and uses rate-matched binary event rasters. Finally, we focus on gated MLP activations (common in modern LLMs; \citep{shazeer2020glu}) and distinguish event connectivity from activation-magnitude outlier studies \citep{sun2024massive}.
+
+\section{Method}
+\subsection{Token-by-layer event lattice}
+Let a transformer with $L$ blocks process a token sequence of length $T$. For each token position $t\in\{1,\dots,T\}$ and layer $\ell\in\{1,\dots,L\}$, we extract a fixed internal gated-MLP tensor $u_{t,\ell,i}$ (indexed by MLP hidden dimension $i$) at a specified hookpoint (pre-down-projection for gated MLPs). We standardize using per-layer moments $(\mu_{\ell},\sigma_{\ell})$ estimated on a fixed calibration slice:
+\[
+z_{t,\ell,i} = \frac{u_{t,\ell,i}-\mu_{\ell}}{\sigma_{\ell}+\varepsilon}.
+\]
+We define spike events in two ways:
+\[
+s^{(+)}_{t,\ell,i}=\mathbb{1}[z_{t,\ell,i}>\tau_{\ell}] \quad\text{and}\quad
+s^{(\pm)}_{t,\ell,i}=\mathbb{1}[|z_{t,\ell,i}|>\tau_{\ell}].
+\]
+We aggregate spikes into an event-count field and a binary occupancy field:
+\[
+A_{t,\ell} = \sum_{i} s_{t,\ell,i}, \qquad X_{t,\ell} = \mathbb{1}[A_{t,\ell} > 0].
+\]
+The binary raster $X\in\{0,1\}^{T\times L}$ is the event lattice used for connected components.
+
+\subsection{Rate-matched thresholds}
+For each gain $g$ and layer $\ell$, we choose $\tau_{\ell}(g)$ so that the marginal event rate matches a target $r^{\star}$:
+\[
+\mathbb{E}_{t,i}\left[s_{t,\ell,i}\right] \approx r^{\star}.
+\]
+Operationally we compute $\tau_{\ell}(g)$ as a per-layer quantile of $z_{t,\ell,i}$ on the calibration slice (separately for $s^{(+)}$ and $s^{(\pm)}$). Rate-matching success is verified by the maximum absolute rate error across layers (\Cref{fig:F02_RATE_MATCH_CHECK}).
+
+\subsection{Avalanches and connected components}
+We define avalanches as connected components of active sites in the token-by-layer lattice under a 4-neighborhood adjacency (time and depth moves). Each component $C$ has size $S(C)=\sum_{(t,\ell)\in C} A_{t,\ell}$, duration in tokens (span along $t$), and depth span along $\ell$.
+
+\subsection{Directional branching metrics}
+For each active site $(t,\ell)$ we count forward-neighbor activations in time $(t+1,\ell)$ and depth $(t,\ell+1)$, normalized by the number of possible forward neighbors. Aggregating yields:
+\[
+b_{\text{time}},\quad b_{\text{depth}},\quad b_{\text{tot}}=b_{\text{time}}+b_{\text{depth}}.
+\]
+We also compute a susceptibility proxy $\chi$ (variance-based; see Appendix) and a descriptive crackling exponent fit on the avalanche size distribution (reported with bootstrap confidence intervals). We treat these as \emph{signatures} rather than proofs of criticality.
+
+\subsection{Marginals-preserving null and \texorpdfstring{$\Delta b$}{Delta b}}
+To isolate connectivity from marginals, we construct a within-layer time-permutation null: for each layer $\ell$, apply a permutation $\pi_{\ell}$ to token indices, permuting $A_{t,\ell}$ across $t$ while preserving each layer's multiset of counts exactly. We compute branching on this permuted raster to obtain $b_{\cdot,\text{perm}}$, then define:
+\[
+\Delta b_{\cdot} = b_{\cdot} - b_{\cdot,\text{perm}}.
+\]
+A non-zero $\Delta b$ indicates structure beyond marginals.
+
+\subsection{Gain intervention and mechanistic \texorpdfstring{$g^{\star}$}{g*}}
+We modify each transformer block's residual update to scale the MLP branch:
+\[
+h_{\ell+1} = h_{\ell} + \mathrm{Attn}_{\ell}(h_{\ell}) + g\cdot \mathrm{MLP}_{\ell}(h_{\ell}).
+\]
+On Dataset~A, for each (spike definition, target rate) condition, we select
+\[
+g^{\star} = \arg\min_{g\in \mathcal{G}} |b_{\mathrm{tot}}(g) - 1|.
+\]
+We then evaluate the same $g^{\star}$ unchanged on Dataset~B and ARC multiple-choice, comparing against $g{=}1$.
+
+\section{Experiments}
+\subsection{Model and datasets}
+We evaluate two 7B checkpoints from the same model family (Qwen2.5-7B-Instruct and Qwen2.5-7B base) using three datasets:
+\begin{itemize}
+  \item \textbf{Dataset A:} a fixed slice of Wikitext-103 validation (mechanistic calibration and signatures).
+  \item \textbf{Dataset B:} a fixed slice of C4-en validation (transfer evaluation).
+  \item \textbf{ARC multiple-choice:} ARC-Challenge (task metric evaluation).
+\end{itemize}
+All experiments are inference/analysis heavy and fit within a single-GPU budget by limiting the number of sequences and gain conditions in the published run.
+
+\subsection{Conditions and controls}
+We evaluate:
+\begin{itemize}
+  \item Two spike definitions: one-sided $s^{(+)}$ and two-sided $s^{(\pm)}$.
+  \item Target marginal rates: $r^{\star}\in\{1,2,4,8\}\times 10^{-5}$.
+  \item Gain grid $\mathcal{G}=\{0.70,0.80,0.85,0.90,\allowbreak 0.95,1.00,1.05,\allowbreak 1.10,1.15,1.20,1.30\}$.
+\end{itemize}
+For each $g$ we rate-match $\tau_{\ell}(g)$ and evaluate two within-layer nulls: within-layer time permutation and within-layer circular shift. We report mechanistic metrics (branching, $\Delta b$, $\chi$) and task metrics (perplexity, ARC accuracy) with bootstrap confidence intervals.
+
+\section{Results}
+\subsection{Event rasters and rate matching}
+\Cref{fig:F01_RASTER_EXAMPLE} shows a representative token-by-layer event raster. Rate matching succeeds across all Dataset~A conditions, with maximum absolute per-layer rate error below the fixed tolerance (\Cref{fig:F02_RATE_MATCH_CHECK} and Table~\ref{tab:t01_selected}). This control is required to interpret any gain-dependent changes in branching.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figures/fig_F01_RASTER_EXAMPLE.pdf}
+  \caption{F01: Token-by-layer event raster example (Dataset A). Active sites are thresholded standardized MLP-gate activations; connected components correspond to avalanche-like event cascades on the token-by-layer lattice.}
+  \label{fig:F01_RASTER_EXAMPLE}
+\end{figure*}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_F02_RATE_MATCH_CHECK.pdf}
+  \caption{F02: Rate-matching verification across gains (representative condition). Achieved marginal spike rates per layer match the target rate within tolerance across the full gain grid.}
+  \label{fig:F02_RATE_MATCH_CHECK}
+\end{figure}
+
+\subsection{Gain affects branching under rate matching}
+\Cref{fig:F03_BRANCHING_CURVES} plots $b_{\text{time}}$, $b_{\text{depth}}$, and $b_{\text{tot}}$ versus gain for both spike definitions at a representative target rate. Full results across all target rates are reported in Table~\ref{tab:t01_selected}. In the provided runs, $b_{\mathrm{tot}}$ varies with gain under rate matching (Table~\ref{tab:t01_selected}). The null-controlled residual $\Delta b_{\mathrm{tot}}$ remains non-zero under a strong within-layer permutation null (\Cref{fig:F04_NULL_DELTAB}; Table~\ref{tab:t01_selected}). This indicates connectivity structure beyond marginals even after rate matching.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figures/fig_F03_BRANCHING_CURVES.pdf}
+  \caption{F03: Directional branching metrics versus gain under rate matching (representative target rate). Total branching $b_{\mathrm{tot}}$ decomposes into token-direction and depth-direction components.}
+  \label{fig:F03_BRANCHING_CURVES}
+\end{figure*}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figures/fig_F04_NULL_DELTAB.pdf}
+  \caption{F04: Null-controlled residual connectivity $\Delta b$ relative to a within-layer time-permutation null that preserves per-layer event-count marginals exactly (representative target rate).}
+  \label{fig:F04_NULL_DELTAB}
+\end{figure*}
+
+\subsection{Mechanistic \texorpdfstring{$g^{\star}$}{g*} selection}
+\Cref{fig:F05_GSTAR_SELECTION} visualizes $g^{\star}$ selection by minimizing $|b_{\mathrm{tot}}(g)-1|$ on Dataset~A. The selected $g^{\star}$ differs across the eight (spike definition, target rate) conditions and can fall on the boundary of the gain grid (Table~\ref{tab:gstar}), illustrating why an explicit cross-dataset test is necessary.
+
+\input{tables/tab_gstar_summary.tex}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_F05_GSTAR_SELECTION.pdf}
+  \caption{F05: Mechanistic $g^{\star}$ selection by minimizing $|b_{\mathrm{tot}}(g)-1|$ on Dataset A (no performance signals used).}
+  \label{fig:F05_GSTAR_SELECTION}
+\end{figure}
+
+\subsection{Cross-dataset evaluation: negative transfer}
+We evaluate the mechanistically selected $g^{\star}$ unchanged on Dataset~B and ARC multiple-choice, comparing against $g{=}1$ (\Cref{fig:F06_GENERALIZATION_B,fig:F07_ARC_MCQ}). Figures visualize one representative condition with confidence intervals; Tables~\ref{tab:genB} and \ref{tab:arc} report all spike-definition/target-rate conditions with bootstrap confidence intervals. Replication across base vs instruct checkpoints is summarized in Appendix Table~\ref{tab:replication}.
+
+\input{tables/tab_generalization_b.tex}
+\input{tables/tab_arc.tex}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_F06_GENERALIZATION_B.pdf}
+  \caption{F06: Dataset B evaluation at $g{=}1$ vs $g^{\star}$ (selected on Dataset A), representative condition with confidence intervals. Tables~\ref{tab:genB} and \ref{tab:t01_selected} report all conditions.}
+  \label{fig:F06_GENERALIZATION_B}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_F07_ARC_MCQ.pdf}
+  \caption{F07: ARC multiple-choice accuracy at $g{=}1$ vs $g^{\star}$ with confidence intervals (representative condition). Table~\ref{tab:arc} reports all conditions.}
+  \label{fig:F07_ARC_MCQ}
+\end{figure}
+
+\subsection{Robustness across spike definitions}
+\Cref{fig:F08_SPIKEDEF_ROBUST} summarizes qualitative robustness across spike definitions, reducing the risk that results depend on a particular thresholding convention.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_F08_SPIKEDEF_ROBUST.pdf}
+  \caption{F08: Robustness across spike definitions (representative target rate). Qualitative gain-dependent patterns persist under one-sided and two-sided event definitions.}
+  \label{fig:F08_SPIKEDEF_ROBUST}
+\end{figure}
+
+\subsection{Claim boundaries}
+We do not infer criticality from tail shapes alone. Tail fits are reported as descriptive diagnostics \citep{clauset2009power,touboul2010can}, and the signature suite is treated as a set of falsifiable probes that can yield negative results under the same controls.
+
+\section{Discussion, limitations, and ethics}
+Our results support two practical takeaways. First, gain scaling changes local event connectivity even when marginal rates are matched and marginals are controlled by a strong null. Second, a mechanistic calibration based on a branching target does not necessarily generalize to task metrics; negative transfer should be expected and reported.
+
+\textbf{Limitations.} The included runs use deterministic dataset slices to fit within a single-GPU budget (Dataset~A: 64 calibration sequences of length 256 for mechanistic metrics; plus a separate 128-sequence slice for raster/null extraction; Dataset~B: 96 sequences of length 256; ARC-Challenge test split). Uncertainty estimates for mechanistic metrics can still tighten with additional sampling. We evaluate two checkpoints (instruction-tuned and base) within one model family and a single gain intervention family.
+
+\textbf{Ethics.} This work analyzes internal activations of open models and does not introduce new training data or deployment. Interpretability results should not be overinterpreted as cognitive equivalence.
+
+\section*{Reproducibility statement}
+All figures and tables referenced in this paper are included as immutable artifacts in the accompanying bundle. Each producing run contains \texttt{run\_\allowbreak record.json} and \texttt{config\_\allowbreak resolved.yaml} describing model, data slices, conditions, and artifact hashes. Appendix~\ref{sec:provenance} lists the run identifiers used for each main figure and table.
+
+\clearpage
+\begin{thebibliography}{9}
+\small
+\raggedright
+
+\bibitem[Beggs and Plenz(2003)]{beggs2003neuronal}
+John M. Beggs and Dietmar Plenz.
+\newblock Neuronal avalanches in neocortical circuits.
+\newblock \emph{Journal of Neuroscience}, 23(35):11167--11177, 2003.
+\newblock doi:10.1523/JNEUROSCI.23-35-11167.2003.
+
+\bibitem[Clauset et~al.(2009)Clauset, Shalizi, and Newman]{clauset2009power}
+Aaron Clauset, Cosma Rohilla Shalizi, and Mark E.~J. Newman.
+\newblock Power-law distributions in empirical data.
+\newblock \emph{SIAM Review}, 51(4):661--703, 2009.
+\newblock doi:10.1137/070710111.
+
+\bibitem[Touboul and Destexhe(2010)]{touboul2010can}
+Jonathan Touboul and Alain Destexhe.
+\newblock Can power-law scaling and neuronal avalanches arise from stochastic dynamics?
+\newblock \emph{PLOS ONE}, 5(2):e8982, 2010.
+\newblock doi:10.1371/journal.pone.0008982.
+
+\bibitem[Sun et~al.(2024)Sun, Chen, Kolter, and Liu]{sun2024massive}
+Mingjie Sun, Xinlei Chen, J. Zico Kolter, and Zhuang Liu.
+\newblock Massive activations in large language models.
+\newblock arXiv preprint arXiv:2402.17762, 2024.
+\newblock doi:10.48550/arXiv.2402.17762.
+
+\bibitem[Schoenholz et~al.(2016)Schoenholz, Gilmer, Ganguli, and Sohl-Dickstein]{schoenholz2016deep}
+Samuel S. Schoenholz, Justin Gilmer, Surya Ganguli, and Jascha Sohl-Dickstein.
+\newblock Deep information propagation.
+\newblock arXiv preprint arXiv:1611.01232, 2016.
+\newblock doi:10.48550/arXiv.1611.01232.
+
+\bibitem[Poole et~al.(2016)Poole, Lahiri, Raghu, Sohl-Dickstein, and Ganguli]{poole2016exponential}
+Ben Poole, Subhaneil Lahiri, Maithra Raghu, Jascha Sohl-Dickstein, and Surya Ganguli.
+\newblock Exponential expressivity in deep neural networks through transient chaos.
+\newblock arXiv preprint arXiv:1606.05340, 2016.
+\newblock doi:10.48550/arXiv.1606.05340.
+
+\bibitem[Pennington et~al.(2017)Pennington, Schoenholz, and Ganguli]{pennington2017resurrecting}
+Jeffrey Pennington, Samuel S. Schoenholz, and Surya Ganguli.
+\newblock Resurrecting the sigmoid in deep learning through dynamical isometry: theory and practice.
+\newblock arXiv preprint arXiv:1711.04735, 2017.
+\newblock doi:10.48550/arXiv.1711.04735.
+
+\bibitem[Shazeer(2020)]{shazeer2020glu}
+Noam Shazeer.
+\newblock GLU variants improve transformer.
+\newblock arXiv preprint arXiv:2002.05202, 2020.
+\newblock doi:10.48550/arXiv.2002.05202.
+
+\end{thebibliography}
+
+\clearpage
+\appendix
+\onecolumn
+\section{Appendix: Additional tables, figures, and provenance}
+\label{sec:provenance}
+
+\subsection{Susceptibility curves}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{figures/appendix/fig_F09_CHI_CURVES}
+  \caption{F09: Susceptibility proxy $\chi(g)$ with uncertainty across spike definitions (representative target rate). Full results are in Table~T01.}
+  \label{fig:F09_CHI_CURVES}
+\end{figure}
+
+\subsection{Null comparison}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{figures/appendix/fig_F10_NULL_COMPARE}
+  \caption{F10: $\Delta b_{\mathrm{tot}}(g)$ under multiple nulls, including a structure-preserving circular-shift null.}
+  \label{fig:F10_NULL_COMPARE}
+\end{figure}
+
+\subsection{Ablations}
+\input{tables/appendix/tab_ablations.tex}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{figures/appendix/fig_F11_ABLATIONS}
+  \caption{F11: Ablation comparison of gain interventions (MLP vs attention and layer-banded variants) at matched rates.}
+  \label{fig:F11_ABLATIONS}
+\end{figure}
+
+\subsection{Tail fits and crackling diagnostics (descriptive)}
+\input{tables/appendix/tab_tail_fits.tex}
+\input{tables/appendix/tab_crackling_diagnostics.tex}
+
+\subsection{Replication summary (base vs instruct)}
+\input{tables/appendix/tab_replication_summary.tex}
+
+\subsection{Selected Dataset A condition table}
+\input{tables/tab_t01_selected.tex}
+
+\subsection{Artifact provenance}
+\input{tables/tab_provenance.tex}
+
+\end{document}

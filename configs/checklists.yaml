@@ -1,0 +1,4 @@
+checklists:
+  reproducibility: checklists/reproducibility_checklist.md
+  iclr_artifacts: checklists/artifact_checklist_iclr.md
+  ethics: checklists/ethics_checklist.md

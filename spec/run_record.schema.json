@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "run_record",
+  "type": "object",
+  "required": [
+    "project_id",
+    "pack_version",
+    "run_id",
+    "phase_id",
+    "created_utc",
+    "model",
+    "dataset",
+    "conditions",
+    "artifacts",
+    "hashes"
+  ],
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "pack_version": {
+      "type": "string"
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "phase_id": {
+      "type": "string"
+    },
+    "created_utc": {
+      "type": "string"
+    },
+    "model": {
+      "type": "object"
+    },
+    "dataset": {
+      "type": "object"
+    },
+    "conditions": {
+      "type": "array"
+    },
+    "artifacts": {
+      "type": "object"
+    },
+    "hashes": {
+      "type": "object"
+    }
+  }
+}

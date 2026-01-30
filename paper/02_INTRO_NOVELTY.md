@@ -1,0 +1,13 @@
+# INTRO NOVELTY
+
+Large language models exhibit striking internal activation structure, including sparsity patterns and occasional extreme activations. Recent work has emphasized outlier magnitudes and their practical implications for quantization and inference stability, motivating a closer look at the internal activation distribution in transformers. We take a different view: instead of treating activations as independent samples, we ask whether thresholded activation events form structured cascades across token positions and depth.
+[@sun2024massive]
+
+Neuroscience offers a concrete construct for studying cascades: neuronal avalanches, which are often analyzed as connected bursts of activity across time and space. Inspired by this measurement paradigm, we represent a transformer forward pass as a two-dimensional lattice indexed by token position and layer, and we define sparse activation events using a fixed internal tensor of the MLP block. This event lattice enables a connected component analysis that yields avalanche-like cascades. [@beggs2003neuronal]
+
+A central challenge is separating genuine connectivity structure from trivial effects. If we adjust a gain parameter that globally rescales MLP contributions, the marginal event rate can change dramatically, and any cascade statistics may change simply because there are more events. To fail closed against this confound, we introduce per-layer rate matching: for each gain value we choose thresholds that keep the marginal firing rate per layer fixed. We also introduce a strong null model that preserves marginals exactly by permuting token order within each layer, destroying sequential structure while keeping event counts unchanged.
+
+Our work makes three novelty moves that are jointly important. First, we use a token by layer event lattice and connected components to define avalanche-like cascades in LLMs, rather than applying off-the-shelf activation statistics. Second, we focus on a directional branching decomposition and a marginals-controlled delta-b residual, which targets connectivity rather than rates. Third, we calibrate a gain value gstar mechanistically on one dataset and evaluate it unchanged on another dataset and on ARC multiple-choice, addressing the concern that g=1 is a trivial optimum and providing a genuine generalization test.
+
+We keep claims conservative. We do not equate power-law-looking tails with criticality. Instead, we report multiple signatures and explicit falsifiers, and we treat heavy-tail fits as descriptive diagnostics following standard statistical cautions.
+[@clauset2009power] [@touboul2010can]

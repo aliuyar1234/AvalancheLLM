@@ -1,0 +1,5 @@
+models:
+  base:
+    hf_id: CANON.MODEL.QWEN25_7B_BASE.HF_ID
+  instruct:
+    hf_id: CANON.MODEL.QWEN25_7B_INSTRUCT_LOCAL.HF_ID

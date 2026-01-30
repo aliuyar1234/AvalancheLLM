@@ -1,0 +1,23 @@
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{llrrrrr}
+\toprule
+Spike def & Target rate & $g^{\star}$ & $b_{\mathrm{tot}}(g{=}1)$ & $b_{\mathrm{tot}}(g^{\star})$ & $\Delta b_{\mathrm{tot}}(g{=}1)$ & $\Delta b_{\mathrm{tot}}(g^{\star})$ \\
+\midrule
+ one-sided (+) & 1e-05 & 0.700 & 0.593 & 0.599 & 0.263 & 0.266 \\
+ one-sided (+) & 2e-05 & 0.700 & 0.823 & 0.833 & 0.260 & 0.271 \\
+ one-sided (+) & 4e-05 & 1.300 & 1.102 & 1.089 & 0.226 & 0.210 \\
+ one-sided (+) & 8e-05 & 1.300 & 1.395 & 1.387 & 0.158 & 0.145 \\
+ two-sided ($|\cdot|$) & 1e-05 & 0.850 & 0.627 & 0.629 & 0.295 & 0.300 \\
+ two-sided ($|\cdot|$) & 2e-05 & 1.000 & 0.853 & 0.853 & 0.305 & 0.305 \\
+ two-sided ($|\cdot|$) & 4e-05 & 1.300 & 1.113 & 1.103 & 0.267 & 0.253 \\
+ two-sided ($|\cdot|$) & 8e-05 & 1.300 & 1.386 & 1.378 & 0.197 & 0.182 \\
+\bottomrule
+\end{tabular}%
+}
+\caption{Mechanistic gain calibration on Dataset A: selected $g^{\star}$ by minimizing $|b_{\mathrm{tot}}(g)-1|$ under rate-matched thresholds, and corresponding branching statistics at $g=1$ and $g^{\star}$. Values from Table~T01 and \texttt{gstar.json}.}
+\label{tab:gstar}
+\end{table}

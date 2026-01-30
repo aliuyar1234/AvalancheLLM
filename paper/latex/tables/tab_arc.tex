@@ -1,0 +1,23 @@
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{llrrrr}
+\toprule
+ Spike def & Target rate & $g^{\star}$ & Acc($g{=}1$) [95\% CI] & Acc($g^{\star}$) [95\% CI] & $\Delta$Acc \\
+\midrule
+ one-sided (+) & 1e-05 & 0.700 & 0.885 [0.866, 0.902] & 0.873 [0.852, 0.890] & -0.012 \\
+ one-sided (+) & 2e-05 & 0.700 & 0.885 [0.866, 0.902] & 0.873 [0.852, 0.890] & -0.012 \\
+ one-sided (+) & 4e-05 & 1.300 & 0.885 [0.866, 0.902] & 0.857 [0.837, 0.875] & -0.028 \\
+ one-sided (+) & 8e-05 & 1.300 & 0.885 [0.866, 0.902] & 0.857 [0.837, 0.875] & -0.028 \\
+ two-sided ($|\cdot|$) & 1e-05 & 0.850 & 0.885 [0.866, 0.902] & 0.886 [0.866, 0.903] & 0.001 \\
+ two-sided ($|\cdot|$) & 2e-05 & 1.000 & 0.885 [0.866, 0.902] & 0.885 [0.866, 0.902] & 0.000 \\
+ two-sided ($|\cdot|$) & 4e-05 & 1.300 & 0.885 [0.866, 0.902] & 0.857 [0.837, 0.875] & -0.028 \\
+ two-sided ($|\cdot|$) & 8e-05 & 1.300 & 0.885 [0.866, 0.902] & 0.857 [0.837, 0.875] & -0.028 \\
+\bottomrule
+\end{tabular}%
+}
+ \caption{ARC-Challenge multiple-choice evaluation: accuracy at $g=1$ vs $g^{\star}$ (selected on Dataset A), with bootstrap 95\% confidence intervals from question resampling.}
+\label{tab:arc}
+\end{table}

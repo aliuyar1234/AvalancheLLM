@@ -1,0 +1,23 @@
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{llrrrr}
+\toprule
+ Spike def & Target rate & $g^{\star}$ & PPL($g{=}1$) [95\% CI] & PPL($g^{\star}$) [95\% CI] & $\Delta$PPL \\
+\midrule
+ one-sided (+) & 1e-05 & 0.700 & 15.173 [13.473, 17.130] & 17.627 [15.698, 19.816] & 2.453 \\
+ one-sided (+) & 2e-05 & 0.700 & 15.173 [13.473, 17.130] & 17.627 [15.698, 19.816] & 2.453 \\
+ one-sided (+) & 4e-05 & 1.300 & 15.173 [13.473, 17.130] & 16.300 [14.522, 18.308] & 1.127 \\
+ one-sided (+) & 8e-05 & 1.300 & 15.173 [13.473, 17.130] & 16.300 [14.522, 18.308] & 1.127 \\
+ two-sided ($|\cdot|$) & 1e-05 & 0.850 & 15.173 [13.473, 17.130] & 15.746 [13.973, 17.799] & 0.573 \\
+ two-sided ($|\cdot|$) & 2e-05 & 1.000 & 15.173 [13.473, 17.130] & 15.173 [13.473, 17.130] & 0.000 \\
+ two-sided ($|\cdot|$) & 4e-05 & 1.300 & 15.173 [13.473, 17.130] & 16.300 [14.522, 18.308] & 1.127 \\
+ two-sided ($|\cdot|$) & 8e-05 & 1.300 & 15.173 [13.473, 17.130] & 16.300 [14.522, 18.308] & 1.127 \\
+\bottomrule
+\end{tabular}%
+}
+ \caption{Dataset B evaluation: perplexity at $g=1$ and at the mechanistically calibrated $g^{\star}$ (selected on Dataset A), with bootstrap 95\% confidence intervals from sequence resampling.}
+\label{tab:genB}
+\end{table}

@@ -1,0 +1,3 @@
+budgets:
+  gpu_hours_max: CANON.CONST.GPU_HOURS_MAX
+  note: keep total below this

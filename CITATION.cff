@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite it using the metadata below."
+title: "Avalanche LLM ICLR Pack"
+type: software
+version: "1.0.4"
+date-released: "2026-01-30"
+authors:
+  - family-names: Uyar
+    given-names: Ali
+    affiliation: "Independent Researcher"
+preferred-citation:
+  type: article
+  title: "Token--Layer Activation Event Cascades in LLMs: Rate-Matched Connectivity under Gain Scaling"
+  authors:
+    - family-names: Uyar
+      given-names: Ali
+      affiliation: "Independent Researcher"
+  year: 2026
