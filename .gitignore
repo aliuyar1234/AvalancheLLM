@@ -43,6 +43,14 @@ cache/
 results/
 runs/
 
+# Internal notes / reports (keep local, not tracked)
+AGENTS.md
+progress.md
+AUDIT_REPORT.md
+PATCH_REPORT.md
+QUALITY_SELF_AUDIT.md
+SPEC.md
+
 # LaTeX build artifacts (keep sources + figures/tables)
 paper/latex/*.aux
 paper/latex/*.bbl
