@@ -1,5 +1,10 @@
 # Avalanche LLM: Token–Layer Activation Event Cascades in LLMs
 
+[![Paper PDF](https://img.shields.io/badge/Paper-PDF-blue)](https://github.com/aliuyar1234/AvalancheLLM/raw/main/paper.pdf)
+[![Cite](https://img.shields.io/badge/Cite-CITATION.cff-green)](CITATION.cff)
+[![Last commit](https://img.shields.io/github/last-commit/aliuyar1234/AvalancheLLM)](https://github.com/aliuyar1234/AvalancheLLM/commits/main)
+[![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+
 This repository is a single-source-of-truth (SSOT) reproducibility pack for analyzing thresholded gated-MLP activation events as connected cascades on a token-by-layer lattice, and for testing a simple gain intervention under strong controls.
 
 The core scientific goal is mechanistic: measure how local connectivity signatures change with MLP gain scaling while explicitly controlling for marginal event rates and layerwise marginals. The pack is designed to be inference-heavy (no training) and to run within a practical single-GPU budget via fixed, deterministic dataset slices.
